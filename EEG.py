@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import mne
 
-time = []
+time = []                        #Estellung der einzellnen EEG-Channels
 list_Ref1 = []
 list_Ref2 = []
 list_T3 = []
@@ -14,14 +14,14 @@ list_C1 = []
 list_C2 = []
 splitter = []
 
-with open('Pa2_ExG.csv', 'r', newline='') as csvfile:
+with open('Pa2_ExG.csv', 'r', newline='') as csvfile:    #öffnen und auslesen der Daten der Testperson
     reader = csv.reader(csvfile, delimiter=',')
     headers = [header.strip() for header in next(reader)]
 
     print(len(headers))
     print(headers)
     longnis = len(headers)
-    for row in reader:
+    for row in reader:               #Befüllen der einzelnen EEG-Chanels
         time.append(float(row[0]))
         list_Ref1.append(float(row[1]))
         list_Ref2.append(float(row[2]))
@@ -35,7 +35,7 @@ with open('Pa2_ExG.csv', 'r', newline='') as csvfile:
     print('done')
 
 
-with open('Pa2_Marker.csv', 'r', newline='') as csvfile:
+with open('Pa2_Marker.csv', 'r', newline='') as csvfile:      #öffnen und Auslesen der Zeitpunkte des Anfangs der einzelnen Phasen
     reader = csv.reader(csvfile, delimiter=',')
     headers = [header.strip() for header in next(reader)]
 
@@ -49,7 +49,7 @@ five_sec_segments = []
 master_time = float(time[0])
 splitter_pos = []
 j = 0
-for i in range(1, len(time)):
+for i in range(1, len(time)):        #einteilung der EEG-Daten in 5 sekunden segmente
     now = float(time[i])
     if now >= splitter[j]:
         splitter_pos.append(len(five_sec_segments))
@@ -72,14 +72,12 @@ labels = ['baseline', '6Hz +3BPM', '6Hz -3BPM', '6Hz -6BPM',
           '10Hz +3BPM', '10Hz -3BPM', '10Hz -6BPM', 'extra', 'extra', 'extra', 'extra', 'extra', 'extra', 'extra']
 n_channels = 8
 sampling_freq = 250  # in Hertz
-ch_names = ["A1", "A2", "T3", "T4", "O1", "O2", "C1", "C2"]
+ch_names = ["A1", "A2", "T3", "T4", "O1", "O2", "C1", "C2"]                  # Definition des info sets zum starten des mne Auswertungs Programms
 ch_types = ["eeg"] * 8
 info = mne.create_info(ch_names, ch_types=ch_types, sfreq=sampling_freq)
 info.set_montage("standard_1020")
 
-for h in range(len(splitter_pos) - 1):
-    #if h in skips:
-        #continue
+for h in range(len(splitter_pos) - 1):                             # Einteilung in einzelne Phasen
     begin = five_sec_segments[splitter_pos[h]]
     end = five_sec_segments[splitter_pos[h + 1]]
 
@@ -94,10 +92,9 @@ for h in range(len(splitter_pos) - 1):
 
     scalings = {'eeg': 8}
 
-    raw.compute_psd(fmax=30).plot(picks="data", exclude="bads", amplitude=False)
+    raw.compute_psd(fmax=30).plot(picks="data", exclude="bads", amplitude=False)      #Erstellung der Frequenz Analysen der einzellnen Phasen
     plt.title(labels[h])
 
-    #raw.plot(duration=5, n_channels=8)
 plt.figure()
 plt.plot(list_C2)
 plt.show()
